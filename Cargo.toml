@@ -1,0 +1,12 @@
+[package]
+name = "rust-xgboost-bindgen"
+version = "0.1.0"
+edition = "2021"
+links = "xgboost"
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+bindgen = "0.59"
+cmake = "0.1"
