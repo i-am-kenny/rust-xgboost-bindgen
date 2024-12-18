@@ -4,9 +4,12 @@ version = "0.1.0"
 edition = "2021"
 links = "xgboost"
 
+[lib]
+doctest = false
+
 [dependencies]
 libc = "0.2"
 
 [build-dependencies]
-bindgen = "0.59"
+bindgen = "0.71"
 cmake = "0.1"

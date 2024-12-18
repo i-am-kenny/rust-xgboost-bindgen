@@ -26,7 +26,6 @@ fn main() {
         .blocklist_item("std::__1.*")
         .clang_args(&["-x", "c++", "-std=c++11"])
         .clang_arg(format!("-I{}", xgb_root.join("include").display()))
-        // .clang_arg(format!("-I{}", xgb_root.join("rabit/include").display()))
         .clang_arg(format!(
             "-I{}",
             xgb_root.join("dmlc-core/include").display()
@@ -69,5 +68,5 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=xgboost");
 
     #[cfg(not(target_os = "macos"))]
-    println!("cargo:rustc-link-lib=dylib=xgboost");
+    println!("cargo:rustc-link-lib=static=xgboost");
 }
