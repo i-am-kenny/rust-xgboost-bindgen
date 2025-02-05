@@ -2,7 +2,9 @@ use std::{env, path::Path, process::Command};
 
 fn main() {
     let target = env::var("TARGET").expect("TARGET not defined");
-    let out_dir = env::var("OUT_DIR").map(std::path::PathBuf::from).expect("OUT_DIR not defined");
+    let out_dir = env::var("OUT_DIR")
+        .map(std::path::PathBuf::from)
+        .expect("OUT_DIR not defined");
     let xgb_root = Path::new(&out_dir).join("xgboost");
 
     if !xgb_root.exists() {
