@@ -47,7 +47,7 @@ impl DMatrix {
     }
 
     pub fn from_ptr(
-        data: *const f64,
+        data: *const f32,
         number_of_rows: usize,
         number_of_columns: usize,
     ) -> XGBoostResult<Self> {
