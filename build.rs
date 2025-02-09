@@ -70,5 +70,5 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=xgboost");
 
     #[cfg(not(target_os = "macos"))]
-    println!("cargo:rustc-link-lib=static=xgboost");
+    println!("cargo:rustc-link-lib=dylib=xgboost");
 }
