@@ -16,9 +16,18 @@ fn main() {
             });
     }
 
+    #[cfg(target_os = "macos")]
     let dst = cmake::Config::new(xgb_root.as_path())
         // only for macos https://github.com/dmlc/xgboost/pull/5397/files
         // .define("BUILD_STATIC_LIB", "ON")
+        // .define("CC", "gcc-11")
+        // .define("CXX", "g++-11")
+        .build();
+
+    #[cfg(not(target_os = "macos"))]
+    let dst = cmake::Config::new(xgb_root.as_path())
+        // only for macos https://github.com/dmlc/xgboost/pull/5397/files
+        .define("BUILD_STATIC_LIB", "ON")
         // .define("CC", "gcc-11")
         // .define("CXX", "g++-11")
         .build();
