@@ -94,38 +94,6 @@ impl Booster {
 
         Ok(out_result)
     }
-
-    pub fn predict_from_dmatrix(&self, dmatrix: &DMatrix) -> XGBoostResult<Vec<f32>> {
-        let shape: Box<u64> = Box::new(0);
-        let out_shape = Box::into_raw(shape);
-
-        let mut out_dim: u64 = 0;
-        let mut out_result = ptr::null();
-
-        let config = include_str!("default_predict_config.json");
-        let config = string_to_cstring(config.into())?;
-
-        crate::xgboost_call!(bindings::XGBoosterPredictFromDMatrix(
-            *self.handle,
-            *dmatrix.handle,
-            config.as_ptr(),
-            out_shape as *mut *const u64,
-            &mut out_dim,
-            &mut out_result
-        ))?;
-
-        if out_result.is_null() {
-            return Err(XGBoostError::from_str("booster predicted return null"));
-        }
-
-        let shape = unsafe { Box::from_raw(out_shape) };
-
-        println!("{shape}");
-
-        let out_result = unsafe { slice::from_raw_parts(out_result, 42087*5).to_vec() };
-
-        Ok(out_result)
-    }
 }
 
 impl Drop for Booster {
