@@ -1,10 +1,8 @@
-use std::rc::Rc;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::{path::Path, ptr, slice};
 
 use crate::{bindings, xg::XGBoostError, DMatrix};
 
-use super::utils::string_to_cstring;
 use super::{utils, XGBoostResult};
 
 pub struct Booster {
@@ -65,7 +63,7 @@ impl Booster {
         crate::xgboost_call!(bindings::XGBoosterUpdateOneIter(
             *self.handle,
             iteration,
-            *dtrain.handle
+            dtrain.handle
         ))?;
 
         Ok(())
@@ -78,7 +76,7 @@ impl Booster {
 
         crate::xgboost_call!(bindings::XGBoosterPredict(
             *self.handle,
-            *dmatrix.handle,
+            dmatrix.handle,
             PredictOption::as_mask(options),
             ntree_limit,
             0,
