@@ -13,30 +13,13 @@ mod tests {
     fn read_matrix() {
         let dmat_train = "xgboost/demo/data/agaricus.txt.train?format=libsvm";
 
-        let silent = 0;
-        let mut handle = std::ptr::null_mut();
-        let fname = std::ffi::CString::new(dmat_train).unwrap();
-        let ret_val = unsafe { XGDMatrixCreateFromFile(fname.as_ptr(), silent, &mut handle) };
-        unsafe {
-            let message = XGBGetLastError();
-            let message = std::ffi::CStr::from_ptr(message);
-            println!("{}", message.to_str().unwrap());
-        };
-        // println!("{message}");
-        assert_eq!(ret_val, 0);
+        let dmatrix = crate::DMatrix::from_file(dmat_train).unwrap();
 
-        let mut num_rows = 0;
-        let ret_val = unsafe { XGDMatrixNumRow(handle, &mut num_rows) };
-        assert_eq!(ret_val, 0);
+        let num_rows = dmatrix.rows().unwrap();
         assert_eq!(num_rows, 6513);
 
-        let mut num_cols = 0;
-        let ret_val = unsafe { XGDMatrixNumCol(handle, &mut num_cols) };
-        assert_eq!(ret_val, 0);
+        let num_cols = dmatrix.columns().unwrap();
         assert_eq!(num_cols, 127);
-
-        let ret_val = unsafe { XGDMatrixFree(handle) };
-        assert_eq!(ret_val, 0);
     }
 
     #[test]
