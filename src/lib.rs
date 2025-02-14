@@ -58,11 +58,11 @@ mod tests {
 
         println!("num_features: {num_features}");
 
-        let ((rows, columns), predictions) = booster.predict_from_dmatrix(&d_test).unwrap();
+        let (dimensions, predictions) = booster.predict_from_dmatrix(&d_test).unwrap();
 
         let sample = &predictions[..10];
 
-        println!("rows: {rows}, columns: {columns}, predictions: {sample:?}..");
+        println!("dimensions: {dimensions:?}, predictions: {sample:?}..");
 
     }
 }

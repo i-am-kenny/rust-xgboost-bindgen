@@ -151,7 +151,7 @@ impl Booster {
         Ok(out_result)
     }
 
-    pub fn predict_from_dmatrix(&self, dmatrix: &DMatrix) -> XGBoostResult<((u64, u64), Vec<f32>)> {
+    pub fn predict_from_dmatrix(&self, dmatrix: &DMatrix) -> XGBoostResult<(Vec<u64>, Vec<f32>)> {
         let shape: Rc<u64> = Rc::new(0u64);
         let shape = Rc::as_ptr(&shape);
         let shape = shape as *mut *const u64;
@@ -175,12 +175,18 @@ impl Booster {
             return Err(XGBoostError::from_str("booster predicted return null"));
         }
 
-        let shape = unsafe { **shape };
+        let dimensions = unsafe { slice::from_raw_parts(shape, out_dim as usize) };
+        let dimensions: Vec<_> = dimensions.iter().map(|s| unsafe { **s }).collect();
 
-        let out_result =
-            unsafe { slice::from_raw_parts(out_result, (shape * out_dim) as usize).to_vec() };
+        let length = dimensions
+            .iter()
+            .cloned()
+            .reduce(|acc, i| acc * i)
+            .unwrap_or_default();
 
-        Ok(((shape, out_dim), out_result))
+        let out_result = unsafe { slice::from_raw_parts(out_result, length as usize).to_vec() };
+
+        Ok((dimensions, out_result))
     }
 }
 
