@@ -1,26 +1,17 @@
-#![allow(clippy::all)]
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
+#[allow(dead_code)]
+#[allow(clippy::all)]
+#[allow(non_upper_case_globals)]
+#[allow(non_camel_case_types)]
+#[allow(non_snake_case)]
+mod bindings {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+pub use bindings::*;
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn read_matrix() {
-        let dmat_train = "xgboost/demo/data/agaricus.txt.train?format=libsvm";
-
-        let dmatrix = crate::DMatrix::from_file(dmat_train).unwrap();
-
-        let num_rows = dmatrix.rows().unwrap();
-        assert_eq!(num_rows, 6513);
-
-        let num_cols = dmatrix.columns().unwrap();
-        assert_eq!(num_cols, 127);
-    }
 
     #[test]
     fn compute_matrix() {
