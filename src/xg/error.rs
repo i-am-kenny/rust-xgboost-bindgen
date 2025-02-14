@@ -6,7 +6,7 @@ pub type XGBoostResult<T> = Result<T, XGBoostError>;
 
 #[derive(Debug)]
 pub struct XGBoostError {
-    inner: String,
+    pub(crate) inner: String,
 }
 
 impl error::Error for XGBoostError {}
