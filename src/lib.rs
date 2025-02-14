@@ -43,7 +43,7 @@ mod tests {
             ("validate_parameters", "true"),
         ];
         for (key, value) in parameters {
-            booster.set_param(key, value).unwrap();
+            booster.set_param_native(key, value).unwrap();
         }
 
         let eval_names = ["train", "test"];

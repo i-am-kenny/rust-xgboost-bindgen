@@ -55,7 +55,7 @@ impl Booster {
         Ok(())
     }
 
-    pub fn set_param(&self, name: &str, value: &str) -> XGBoostResult<()> {
+    pub fn set_param_native(&self, name: &str, value: &str) -> XGBoostResult<()> {
         let name = utils::str_to_cstring(name)?;
         let value = utils::str_to_cstring(value)?;
 
