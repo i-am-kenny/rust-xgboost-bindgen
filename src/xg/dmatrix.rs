@@ -1,6 +1,6 @@
-use crate::bindings;
+use crate::{bindings, XGCompatible};
 
-use super::{XGBoostError, XGBoostResult};
+use super::{TypeStr, XGBoostError, XGBoostResult};
 
 pub struct DMatrix {
     pub(crate) handle: bindings::DMatrixHandle,
@@ -83,6 +83,28 @@ impl DMatrix {
             number_of_columns as bindings::bst_ulong,
             f32::NAN,
             &mut handle,
+        ))?;
+
+        Ok(Self { handle })
+    }
+
+    pub fn dense<A: TypeStr, D: ndarray::Dimension>(
+        data: &ndarray::Array<A, D>,
+    ) -> XGBoostResult<Self> {
+        let mut handle = std::ptr::null_mut();
+
+        let super::XGMatrixType::Dense(interface) = data.hint();
+        let interface = serde_json::to_string(&interface).unwrap();
+
+        println!("interface: {interface}");
+
+        let array_interface = std::ffi::CString::new(interface).unwrap();
+
+        crate::xgboost_call!(bindings::XGProxyDMatrixCreate(&mut handle))?;
+
+        crate::xgboost_call!(bindings::XGProxyDMatrixSetDataDense(
+            handle,
+            array_interface.as_ptr()
         ))?;
 
         Ok(Self { handle })

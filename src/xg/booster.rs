@@ -2,7 +2,7 @@ use std::{path::Path, ptr, rc::Rc, slice};
 
 use crate::{bindings, xg::XGBoostError, DMatrix};
 
-use super::{utils, XGBoostResult};
+use super::{utils, ProxyDMatrix, XGBoostResult, XGCompatible};
 
 pub struct Booster {
     pub(crate) handle: bindings::BoosterHandle,
@@ -127,6 +127,63 @@ impl Booster {
         Ok(out)
     }
 
+    // TODO: how to enable multi-datashape predicts
+    pub fn inplace_predict<T: XGCompatible>(
+        &self,
+        matrix: &ProxyDMatrix<'_, T>,
+    ) -> XGBoostResult<(Vec<u64>, Vec<f32>)> {
+        let shape: Rc<u64> = Rc::new(0u64);
+        let shape = Rc::as_ptr(&shape);
+        let shape = shape as *mut *const u64;
+
+        let mut out_result = ptr::null();
+
+        let config = include_str!("default_predict_config.json");
+        let config = std::ffi::CString::new(config).unwrap();
+
+        let opt_matrix = std::ptr::null_mut();
+
+        let mut out_dim: u64 = 0;
+
+        match matrix.inner.hint() {
+            super::XGMatrixType::Dense(interface) => {
+                let interface = serde_json::to_string(&interface).unwrap();
+
+                println!("interface: {interface}");
+
+                let array_interface = std::ffi::CString::new(interface).unwrap();
+
+                crate::xgboost_call!(bindings::XGBoosterPredictFromDense(
+                    self.handle,
+                    array_interface.as_ptr(),
+                    config.as_ptr(),
+                    opt_matrix,
+                    shape,
+                    &mut out_dim,
+                    &mut out_result
+                ))?
+            }
+        }
+
+        if out_result.is_null() {
+            return Err(XGBoostError::from_str("booster predicted return null"));
+        }
+
+        let dimensions =
+            unsafe { slice::from_raw_parts::<bindings::bst_ulong>(*shape, out_dim as usize) };
+        let dimensions: Vec<_> = dimensions.to_vec();
+
+        let length = dimensions
+            .iter()
+            .cloned()
+            .reduce(|acc, i| acc * i)
+            .unwrap_or_default();
+
+        let out_result = unsafe { slice::from_raw_parts(out_result, length as usize).to_vec() };
+
+        Ok((dimensions, out_result))
+    }
+
     pub fn predict(&self, dmatrix: &DMatrix, options: &[PredictOption]) -> XGBoostResult<Vec<f32>> {
         let ntree_limit = 0;
         let mut out_len = 0;
@@ -152,9 +209,9 @@ impl Booster {
     }
 
     pub fn predict_from_dmatrix(&self, dmatrix: &DMatrix) -> XGBoostResult<(Vec<u64>, Vec<f32>)> {
-        let shape: Rc<u64> = Rc::new(0u64);
+        let shape: Rc<bindings::bst_ulong> = Rc::new(0);
         let shape = Rc::as_ptr(&shape);
-        let shape = shape as *mut *const u64;
+        let shape = shape as *mut *const bindings::bst_ulong;
 
         let mut out_dim: u64 = 0;
         let mut out_result = ptr::null();
@@ -175,8 +232,9 @@ impl Booster {
             return Err(XGBoostError::from_str("booster predicted return null"));
         }
 
-        let dimensions = unsafe { slice::from_raw_parts(shape, out_dim as usize) };
-        let dimensions: Vec<_> = dimensions.iter().map(|s| unsafe { **s }).collect();
+        let dimensions =
+            unsafe { slice::from_raw_parts::<bindings::bst_ulong>(*shape, out_dim as usize) };
+        let dimensions: Vec<_> = dimensions.to_vec();
 
         let length = dimensions
             .iter()
