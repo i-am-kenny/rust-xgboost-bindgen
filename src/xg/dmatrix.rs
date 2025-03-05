@@ -9,6 +9,7 @@ pub struct DMatrix {
 }
 
 unsafe impl Send for DMatrix {}
+unsafe impl Sync for DMatrix {}
 
 impl DMatrix {
     pub fn from_file(path: &str) -> XGBoostResult<Self> {

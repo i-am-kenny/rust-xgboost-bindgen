@@ -63,6 +63,5 @@ mod tests {
         let sample = &predictions[..10];
 
         println!("dimensions: {dimensions:?}, predictions: {sample:?}..");
-
     }
 }
