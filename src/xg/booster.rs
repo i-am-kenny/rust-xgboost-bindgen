@@ -47,6 +47,18 @@ impl Booster {
         Ok(booster)
     }
 
+    pub fn load_model_from_buffer(buffer: &[u8]) -> XGBoostResult<Self> {
+        let booster = Self::new()?;
+
+        crate::xgboost_call!(bindings::XGBoosterLoadModelFromBuffer(
+            booster.handle,
+            buffer.as_ptr() as *const _,
+            buffer.len() as u64
+        ))?;
+
+        Ok(booster)
+    }
+
     pub fn save_model<P: AsRef<Path>>(&self, path: P) -> XGBoostResult<()> {
         let path = utils::path_to_cstring(path)?;
 
