@@ -149,7 +149,7 @@ impl Booster {
             super::XGMatrixType::Dense(interface) => {
                 let interface = serde_json::to_string(&interface).unwrap();
 
-                println!("interface: {interface}");
+                // println!("interface: {interface}");
 
                 let array_interface = std::ffi::CString::new(interface).unwrap();
 

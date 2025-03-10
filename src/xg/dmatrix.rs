@@ -96,8 +96,6 @@ impl DMatrix {
         let super::XGMatrixType::Dense(interface) = data.hint();
         let interface = serde_json::to_string(&interface).unwrap();
 
-        println!("interface: {interface}");
-
         let array_interface = std::ffi::CString::new(interface).unwrap();
 
         crate::xgboost_call!(bindings::XGProxyDMatrixCreate(&mut handle))?;
