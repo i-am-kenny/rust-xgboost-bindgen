@@ -1,4 +1,6 @@
 use crate::{bindings, XGCompatible};
+use serde::Serialize;
+
 
 use super::{TypeStr, XGBoostError, XGBoostResult};
 
@@ -7,6 +9,7 @@ pub struct DMatrix {
 }
 
 unsafe impl Send for DMatrix {}
+unsafe impl Sync for DMatrix {}
 
 impl DMatrix {
     pub fn from_file(path: &str) -> XGBoostResult<Self> {
@@ -103,9 +106,36 @@ impl DMatrix {
         crate::xgboost_call!(bindings::XGProxyDMatrixSetDataDense(
             handle,
             array_interface.as_ptr()
+    }
+
+    pub fn from_uri(config: FromUriConfig) -> XGBoostResult<Self> {
+        let mut handle = std::ptr::null_mut();
+
+        let config = serde_json::to_string(&config).map_err(|err| XGBoostError {
+            inner: err.to_string(),
+        })?;
+        let config =
+            std::ffi::CString::new(config).map_err(|e| XGBoostError::from_str(&e.to_string()))?;
+
+        crate::xgboost_call!(bindings::XGDMatrixCreateFromURI(
+            config.as_ptr(),
+            &mut handle
         ))?;
 
         Ok(Self { handle })
+    }
+
+    pub fn save_binary(&self, filename: &str) -> XGBoostResult<()> {
+        let fname =
+            std::ffi::CString::new(filename).map_err(|e| XGBoostError::from_str(&e.to_string()))?;
+
+        crate::xgboost_call!(bindings::XGDMatrixSaveBinary(
+            self.handle,
+            fname.as_ptr(),
+            1
+        ))?;
+
+        Ok(())
     }
 }
 
@@ -113,4 +143,12 @@ impl Drop for DMatrix {
     fn drop(&mut self) {
         crate::xgboost_call!(bindings::XGDMatrixFree(self.handle)).unwrap();
     }
+}
+
+#[derive(Default, Serialize)]
+pub struct FromUriConfig {
+    pub uri: String,
+    pub silent: Option<i32>,
+    /// "row" or "column"
+    pub data_split_mode: Option<String>,
 }
