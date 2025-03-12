@@ -24,14 +24,22 @@ fn main() {
         // .define("CXX", "g++-11")
         .build();
 
-    #[cfg(not(target_os = "macos"))]
-    let dst = cmake::Config::new(xgb_root.as_path())
-        // only for macos https://github.com/dmlc/xgboost/pull/5397/files
-        .define("USE_CUDA", "ON")
-        .define("BUILD_STATIC_LIB", "ON")
-        // .define("CC", "gcc-11")
-        // .define("CXX", "g++-11")
-        .build();
+    // #[cfg(not(target_os = "macos"))]
+    let dst = {
+        let mut config = cmake::Config::new(xgb_root.as_path());
+
+        config.define("BUILD_STATIC_LIB", "ON");
+        #[cfg(feature = "cuda")]
+        config.define("USE_CUDA", "ON");
+
+        #[cfg(all(feature = "cuda", feature = "turing"))]
+        config.define("CMAKE_CUDA_ARCHITECTURES", "75");
+
+        config
+    }
+    // .define("CC", "gcc-11")
+    // .define("CXX", "g++-11")
+    .build();
 
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
@@ -81,4 +89,7 @@ fn main() {
 
     #[cfg(not(target_os = "macos"))]
     println!("cargo:rustc-link-lib=static=xgboost");
+
+    #[cfg(feature="cuda")]
+    println!("cargo:rustc-link-lib=cudart");
 }
