@@ -8,6 +8,7 @@ links = "xgboost"
 doctest = false
 
 [features]
+default = []
 # polars = ["dep:polars"]
 turing = ["cuda"]
 cuda = []
@@ -15,9 +16,8 @@ cuda = []
 
 [dependencies]
 libc = "0.2"
-# polars = { version = ">=0.46", optional = true }
-ndarray = "0.16"
-polars = { version = "0.46", features = ["ndarray"] }
+# ndarray = "0.16"
+# polars = { version = "0.46", features = ["ndarray"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tracing = "0.1"

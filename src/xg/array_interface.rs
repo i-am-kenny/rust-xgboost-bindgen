@@ -1,11 +1,17 @@
 use serde::{ser::SerializeSeq, Serialize};
 
+pub enum ArrayInterface {
+    Strict(ArrayInterfaceStrict),
+
+    /// use for third party libs
+    ThirdParty(String),
+}
+
 /// https://numpy.org/doc/2.1/reference/arrays.interface.html
 #[derive(Serialize, Clone, Debug)]
-pub struct ArrayInterface {
+pub struct ArrayInterfaceStrict {
     pub shape: Vec<u64>,
 
-    // typestr: ArrayType
     pub typestr: String,
 
     pub version: u64,

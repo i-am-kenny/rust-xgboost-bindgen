@@ -90,26 +90,6 @@ impl DMatrix {
         Ok(Self { handle })
     }
 
-    pub fn dense<A: TypeStr, D: ndarray::Dimension>(
-        data: &ndarray::Array<A, D>,
-    ) -> XGBoostResult<Self> {
-        let mut handle = std::ptr::null_mut();
-
-        let super::XGMatrixType::Dense(interface) = data.hint();
-        let interface = serde_json::to_string(&interface).unwrap();
-
-        let array_interface = std::ffi::CString::new(interface).unwrap();
-
-        crate::xgboost_call!(bindings::XGProxyDMatrixCreate(&mut handle))?;
-
-        crate::xgboost_call!(bindings::XGProxyDMatrixSetDataDense(
-            handle,
-            array_interface.as_ptr()
-        ))?;
-
-        Ok(Self { handle })
-    }
-
     pub fn from_uri(config: FromUriConfig) -> XGBoostResult<Self> {
         let mut handle = std::ptr::null_mut();
 

@@ -1,8 +1,6 @@
 use std::ops::Deref;
 
-use ndarray::ShapeArg;
-
-use super::{ArrayInterface, ArrayReference};
+use super::ArrayInterface;
 
 pub struct ProxyDMatrix<'a, T> {
     pub(crate) inner: Data<'a, T>,
@@ -27,12 +25,32 @@ pub trait XGCompatible {
     fn hint(&self) -> XGMatrixType;
 }
 
+pub enum XGMatrixType {
+    CudaDense(ArrayInterface),
+}
+
+impl<T: XGCompatible> ProxyDMatrix<'_, T> {
+    pub fn owned(value: T) -> Self {
+        Self {
+            inner: Data::Owned(value),
+        }
+    }
+}
+
+impl<'a, T: XGCompatible> ProxyDMatrix<'a, T> {
+    pub fn borrowed(value: &'a T) -> Self {
+        Self {
+            inner: Data::Borrowed(value),
+        }
+    }
+}
+
+/*
 pub trait TypeStr {
     fn type_str() -> &'static str;
 }
 
 impl TypeStr for f32 {
-    // TODO: account for sizeof
     fn type_str() -> &'static str {
         "<f4"
     }
@@ -81,23 +99,4 @@ impl<A: TypeStr, D: ndarray::Dimension> XGCompatible for ndarray::Array<A, D> {
     //     todo!()
     // }
 }
-
-pub enum XGMatrixType {
-    Dense(ArrayInterface),
-}
-
-impl<T: XGCompatible> ProxyDMatrix<'_, T> {
-    pub fn owned(value: T) -> Self {
-        Self {
-            inner: Data::Owned(value),
-        }
-    }
-}
-
-impl<'a, T: XGCompatible> ProxyDMatrix<'a, T> {
-    pub fn borrowed(value: &'a T) -> Self {
-        Self {
-            inner: Data::Borrowed(value),
-        }
-    }
-}
+*/

@@ -90,6 +90,6 @@ fn main() {
     #[cfg(not(target_os = "macos"))]
     println!("cargo:rustc-link-lib=static=xgboost");
 
-    #[cfg(feature="cuda")]
-    println!("cargo:rustc-link-lib=cudart");
+    // #[cfg(feature="cuda")]
+    // println!("cargo:rustc-link-lib=cudart");
 }

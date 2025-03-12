@@ -2,7 +2,7 @@ use std::{path::Path, ptr, rc::Rc, slice};
 
 use crate::{bindings, xg::XGBoostError, DMatrix};
 
-use super::{utils, ProxyDMatrix, XGBoostResult, XGCompatible};
+use super::{utils, ArrayInterface, ProxyDMatrix, XGBoostResult, XGCompatible};
 
 pub struct Booster {
     pub(crate) handle: bindings::BoosterHandle,
@@ -139,7 +139,6 @@ impl Booster {
         Ok(out)
     }
 
-    // TODO: how to enable multi-datashape predicts
     pub fn inplace_predict<T: XGCompatible>(
         &self,
         matrix: &ProxyDMatrix<'_, T>,
@@ -158,14 +157,15 @@ impl Booster {
         let mut out_dim: u64 = 0;
 
         match matrix.inner.hint() {
-            super::XGMatrixType::Dense(interface) => {
-                let interface = serde_json::to_string(&interface).unwrap();
-
-                // println!("interface: {interface}");
+            super::XGMatrixType::CudaDense(interface) => {
+                let interface = match interface {
+                    ArrayInterface::Strict(interface) => serde_json::to_string(&interface).unwrap(),
+                    ArrayInterface::ThirdParty(str) => str,
+                };
 
                 let array_interface = std::ffi::CString::new(interface).unwrap();
 
-                crate::xgboost_call!(bindings::XGBoosterPredictFromDense(
+                crate::xgboost_call!(bindings::XGBoosterPredictFromCudaArray(
                     self.handle,
                     array_interface.as_ptr(),
                     config.as_ptr(),
