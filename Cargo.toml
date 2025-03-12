@@ -9,6 +9,9 @@ doctest = false
 
 [features]
 # polars = ["dep:polars"]
+turing = ["cuda"]
+cuda = []
+
 
 [dependencies]
 libc = "0.2"
