@@ -1,7 +1,7 @@
 use crate::{bindings, XGCompatible};
 use serde::Serialize;
 
-use super::{TypeStr, XGBoostError, XGBoostResult};
+use super::{XGBoostError, XGBoostResult};
 
 pub struct DMatrix {
     pub(crate) handle: bindings::DMatrixHandle,
