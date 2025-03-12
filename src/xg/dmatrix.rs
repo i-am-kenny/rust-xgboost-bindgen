@@ -1,7 +1,6 @@
 use crate::{bindings, XGCompatible};
 use serde::Serialize;
 
-
 use super::{TypeStr, XGBoostError, XGBoostResult};
 
 pub struct DMatrix {
@@ -106,6 +105,9 @@ impl DMatrix {
         crate::xgboost_call!(bindings::XGProxyDMatrixSetDataDense(
             handle,
             array_interface.as_ptr()
+        ))?;
+
+        Ok(Self { handle })
     }
 
     pub fn from_uri(config: FromUriConfig) -> XGBoostResult<Self> {
