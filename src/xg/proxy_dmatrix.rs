@@ -25,6 +25,12 @@ pub trait XGCompatible {
     fn hint(&self) -> XGMatrixType;
 }
 
+impl<U: XGCompatible> XGCompatible for std::sync::Arc<U> {
+    fn hint(&self) -> XGMatrixType {
+        self.as_ref().hint()
+    }
+}
+
 pub enum XGMatrixType {
     CudaDense(ArrayInterface),
 }
