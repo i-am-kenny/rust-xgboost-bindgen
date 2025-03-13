@@ -90,6 +90,13 @@ fn main() {
     #[cfg(not(target_os = "macos"))]
     println!("cargo:rustc-link-lib=static=xgboost");
 
-    // #[cfg(feature="cuda")]
-    // println!("cargo:rustc-link-lib=cudart");
+    #[cfg(feature = "cuda")]
+    {
+        let cuda_lib = std::env::var("CUDA_LIBRARY_PATH").expect("MUST PROVIDE CUDA_LIBRARY_PATH");
+        for path in cuda_lib.split(':') {
+            println!("cargo:rustc-link-search={path}");
+        }
+
+        println!("cargo:rustc-link-lib=cudart");
+    }
 }
