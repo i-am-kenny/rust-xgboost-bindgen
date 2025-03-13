@@ -22,12 +22,12 @@ pub struct ArrayInterfaceStrict {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub strides: Option<Vec<usize>>,
 
-    pub descr: Vec<Vec<&'static str>>
+    pub descr: Vec<Vec<&'static str>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ArrayReference {
-    pub pointer: usize,
+    pub pointer: u64,
 
     pub read_only: bool,
 }
