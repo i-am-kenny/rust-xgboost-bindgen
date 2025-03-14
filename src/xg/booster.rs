@@ -189,7 +189,7 @@ impl Booster {
                     .iter()
                     .cloned()
                     .reduce(|acc, i| acc * i)
-                    .unwrap_or_default();
+                    .unwrap_or_default() as usize;
 
                 let mut pool = Vec::with_capacity(length);
 
@@ -197,14 +197,14 @@ impl Booster {
                     cust::sys::cuMemcpyDtoH_v2(
                         pool.as_mut_ptr(),
                         out_result,
-                        length * std::mem::<f32>::size_of(),
+                        length * std::mem::size_of::<f32>(),
                     )
                 };
 
                 match cuda_status {
                     cust::sys::cudaError_enum::CUDA_SUCCESS => Ok(()),
                     error_code => Err(XGBoostError {
-                        inner: format!("CUDA_ERROR: {}", i64::from(error_code)),
+                        inner: format!("CUDA_ERROR: {error_code:?}"),
                     }),
                 }?;
 
