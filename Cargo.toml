@@ -8,7 +8,7 @@ links = "xgboost"
 doctest = false
 
 [features]
-default = ["cuda"]
+default = []
 # polars = ["dep:polars"]
 turing = ["cuda"]
 cuda = ["dep:cust"]
