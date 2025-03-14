@@ -193,13 +193,20 @@ impl Booster {
 
                 let mut pool = Vec::with_capacity(length);
 
-                unsafe {
+                let cuda_status = unsafe {
                     cust::sys::cuMemcpyDtoH_v2(
                         pool.as_mut_ptr(),
                         out_result,
                         length * std::mem::<f32>::size_of(),
                     )
                 };
+
+                match cuda_status {
+                    cust::sys::cudaError_enum::CUDA_SUCCESS => Ok(()),
+                    error_code => Err(XGBoostError {
+                        inner: format!("CUDA_ERROR: {}", i64::from(error_code)),
+                    }),
+                }?;
 
                 Ok((dimensions, pool))
             }
