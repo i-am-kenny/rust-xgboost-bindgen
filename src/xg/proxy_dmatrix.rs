@@ -32,6 +32,7 @@ impl<U: XGCompatible> XGCompatible for std::sync::Arc<U> {
 }
 
 pub enum XGMatrixType {
+    #[cfg(feature = "cuda")]
     CudaDense(ArrayInterface),
 }
 

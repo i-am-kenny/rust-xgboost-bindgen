@@ -157,6 +157,7 @@ impl Booster {
         let mut out_dim: u64 = 0;
 
         match matrix.inner.hint() {
+            #[cfg(feature = "cuda")]
             super::XGMatrixType::CudaDense(interface) => {
                 let interface = match interface {
                     ArrayInterface::Strict(interface) => serde_json::to_string(&interface).unwrap(),
@@ -173,27 +174,36 @@ impl Booster {
                     shape,
                     &mut out_dim,
                     &mut out_result
-                ))?
+                ))?;
+
+                if out_result.is_null() {
+                    return Err(XGBoostError::from_str("booster predicted return null"));
+                }
+
+                let dimensions = unsafe {
+                    slice::from_raw_parts::<bindings::bst_ulong>(*shape, out_dim as usize)
+                };
+                let dimensions: Vec<_> = dimensions.to_vec();
+
+                let length = dimensions
+                    .iter()
+                    .cloned()
+                    .reduce(|acc, i| acc * i)
+                    .unwrap_or_default();
+
+                let mut pool = Vec::with_capacity(length);
+
+                unsafe {
+                    cust::sys::cuMemcpyDtoH_v2(
+                        pool.as_mut_ptr(),
+                        out_result,
+                        length * std::mem::<f32>::size_of(),
+                    )
+                };
+
+                Ok((dimensions, pool))
             }
         }
-
-        if out_result.is_null() {
-            return Err(XGBoostError::from_str("booster predicted return null"));
-        }
-
-        let dimensions =
-            unsafe { slice::from_raw_parts::<bindings::bst_ulong>(*shape, out_dim as usize) };
-        let dimensions: Vec<_> = dimensions.to_vec();
-
-        let length = dimensions
-            .iter()
-            .cloned()
-            .reduce(|acc, i| acc * i)
-            .unwrap_or_default();
-
-        let out_result = unsafe { slice::from_raw_parts(out_result, length as usize).to_vec() };
-
-        Ok((dimensions, out_result))
     }
 
     pub fn predict(&self, dmatrix: &DMatrix, options: &[PredictOption]) -> XGBoostResult<Vec<f32>> {
