@@ -194,11 +194,14 @@ impl Booster {
                 let mut pool: Vec<f32> = Vec::with_capacity(length);
 
                 let cuda_status = unsafe {
-                    cust::sys::cuMemcpyDtoH_v2(
+                    let code = cust::sys::cuMemcpyDtoH_v2(
                         pool.as_mut_ptr() as *mut std::ffi::c_void,
                         out_result as u64,
                         length * std::mem::size_of::<f32>(),
-                    )
+                    );
+                    pool.set_len(length);
+
+                    code
                 };
 
                 match cuda_status {
