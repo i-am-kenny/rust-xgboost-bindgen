@@ -42,7 +42,7 @@ fn main() {
             architectures.push("80");
 
             if !architectures.is_empty() {
-                config.define("CMAKE_CUDA_ARCHITECTURES", architectures.join(';'));
+                config.define("CMAKE_CUDA_ARCHITECTURES", architectures.join(";"));
             }
         }
 
