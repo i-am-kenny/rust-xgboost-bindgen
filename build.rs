@@ -24,16 +24,27 @@ fn main() {
         // .define("CXX", "g++-11")
         .build();
 
-    // #[cfg(not(target_os = "macos"))]
+    #[cfg(not(target_os = "macos"))]
     let dst = {
         let mut config = cmake::Config::new(xgb_root.as_path());
 
         config.define("BUILD_STATIC_LIB", "ON");
         #[cfg(feature = "cuda")]
-        config.define("USE_CUDA", "ON");
+        {
+            config.define("USE_CUDA", "ON");
 
-        #[cfg(all(feature = "cuda", feature = "turing"))]
-        config.define("CMAKE_CUDA_ARCHITECTURES", "75");
+            let mut architectures = vec![];
+
+            #[cfg(feature = "turing")]
+            architectures.push("75");
+
+            #[cfg(feature = "ampere")]
+            architectures.push("80");
+
+            if !architectures.is_empty() {
+                config.define("CMAKE_CUDA_ARCHITECTURES", architectures.join(';'));
+            }
+        }
 
         config
     }
