@@ -10,6 +10,7 @@ doctest = false
 [features]
 default = []
 # polars = ["dep:polars"]
+ampere = ["cuda"]
 turing = ["cuda"]
 cuda = ["dep:cust"]
 
