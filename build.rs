@@ -41,6 +41,9 @@ fn main() {
             #[cfg(feature = "ampere")]
             architectures.push("80");
 
+            #[cfg(feature = "lovelace")]
+            architectures.push("89");
+
             if !architectures.is_empty() {
                 config.define("CMAKE_CUDA_ARCHITECTURES", architectures.join(";"));
             }

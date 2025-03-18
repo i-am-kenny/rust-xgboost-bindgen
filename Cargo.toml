@@ -12,6 +12,7 @@ default = []
 # polars = ["dep:polars"]
 ampere = ["cuda"]
 turing = ["cuda"]
+lovelace = ["cuda"]
 cuda = ["dep:cust"]
 
 
