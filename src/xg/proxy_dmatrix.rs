@@ -1,5 +1,7 @@
 use std::ops::Deref;
 
+use super::ArrayInterface;
+
 pub struct ProxyDMatrix<'a, T> {
     pub(crate) inner: Data<'a, T>,
 }
@@ -32,6 +34,9 @@ impl<U: XGCompatible> XGCompatible for std::sync::Arc<U> {
 pub enum XGMatrixType {
     #[cfg(feature = "cuda")]
     CudaDense(ArrayInterface),
+
+    /// CPU Dense Matrix
+    Dense(ArrayInterface),
 }
 
 impl<T: XGCompatible> ProxyDMatrix<'_, T> {

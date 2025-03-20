@@ -2,7 +2,7 @@ use std::{path::Path, ptr, rc::Rc, slice};
 
 use crate::{bindings, xg::XGBoostError, DMatrix};
 
-use super::{utils, ProxyDMatrix, XGBoostResult, XGCompatible};
+use super::{utils, ArrayInterface, ProxyDMatrix, XGBoostResult, XGCompatible};
 
 pub struct Booster {
     pub(crate) handle: bindings::BoosterHandle,
@@ -148,16 +148,54 @@ impl Booster {
         let shape = Rc::as_ptr(&shape);
         let shape = shape as *mut *const u64;
 
-        let mut out_result: *const T = ptr::null();
+        let mut out_result: *const f32 = ptr::null();
 
         let config = include_str!("default_predict_config.json");
         let config = std::ffi::CString::new(config).unwrap();
 
-        let opt_matrix: *mut T = std::ptr::null_mut();
+        let opt_matrix: bindings::DMatrixHandle = std::ptr::null_mut();
 
         let mut out_dim: u64 = 0;
 
         match matrix.inner.hint() {
+            super::XGMatrixType::Dense(interface) => {
+                let interface = match interface {
+                    ArrayInterface::Strict(interface) => serde_json::to_string(&interface).unwrap(),
+                    ArrayInterface::ThirdParty(str) => str,
+                };
+
+                let array_interface = std::ffi::CString::new(interface).unwrap();
+
+                crate::xgboost_call!(bindings::XGBoosterPredictFromDense(
+                    self.handle,
+                    array_interface.as_ptr(),
+                    config.as_ptr(),
+                    opt_matrix,
+                    shape,
+                    &mut out_dim,
+                    &mut out_result
+                ))?;
+
+                if out_result.is_null() {
+                    return Err(XGBoostError::from_str("booster predicted return null"));
+                }
+
+                let dimensions = unsafe {
+                    slice::from_raw_parts::<bindings::bst_ulong>(*shape, out_dim as usize)
+                };
+                let dimensions: Vec<_> = dimensions.to_vec();
+
+                let length = dimensions
+                    .iter()
+                    .cloned()
+                    .reduce(|acc, i| acc * i)
+                    .unwrap_or_default() as usize;
+
+                let out_result =
+                    unsafe { slice::from_raw_parts(out_result, length as usize).to_vec() };
+
+                Ok((dimensions, out_result))
+            }
             #[cfg(feature = "cuda")]
             super::XGMatrixType::CudaDense(interface) => {
                 let interface = match interface {
