@@ -14,7 +14,7 @@ conda install -c conda-forge py-xgboost
 
 ## CUDA Support
 
-Assuming Debian 10
+Assuming Debian 10. For other installations, refer to https://docs.nvidia.com/cuda/archive/12.4.0/cuda-installation-guide-linux/index.html#package-manager-installation
 
 ```sh
 sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
@@ -30,8 +30,9 @@ wget https://developer.download.nvidia.com/compute/cuda/repos/debian10/x86_64/cu
 sudo dpkg -i cuda-keyring_1.0-1_all.deb
 sudo add-apt-repository contrib
 sudo apt-get update
-sudo apt-get -y install cuda=12.4.0-1
 sudo apt-get install linux-headers-$(uname -r)
+
+sudo apt-get -y install cuda-12-4
 sudo apt-get install -y nvidia-kernel-open-dkms
 sudo apt-get install -y cuda-drivers
 
