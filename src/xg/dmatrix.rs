@@ -1,4 +1,4 @@
-use crate::{bindings, XGCompatible};
+use crate::bindings;
 use serde::Serialize;
 
 use super::{XGBoostError, XGBoostResult};

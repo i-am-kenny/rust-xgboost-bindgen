@@ -1,7 +1,5 @@
 use std::ops::Deref;
 
-use super::ArrayInterface;
-
 pub struct ProxyDMatrix<'a, T> {
     pub(crate) inner: Data<'a, T>,
 }

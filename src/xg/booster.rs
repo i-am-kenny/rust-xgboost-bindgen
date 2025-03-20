@@ -2,7 +2,7 @@ use std::{path::Path, ptr, rc::Rc, slice};
 
 use crate::{bindings, xg::XGBoostError, DMatrix};
 
-use super::{utils, ArrayInterface, ProxyDMatrix, XGBoostResult, XGCompatible};
+use super::{utils, ProxyDMatrix, XGBoostResult, XGCompatible};
 
 pub struct Booster {
     pub(crate) handle: bindings::BoosterHandle,
@@ -79,6 +79,7 @@ impl Booster {
 
         Ok(())
     }
+
     pub fn eval(
         &self,
         eval_dmats: &[&DMatrix],
@@ -147,12 +148,12 @@ impl Booster {
         let shape = Rc::as_ptr(&shape);
         let shape = shape as *mut *const u64;
 
-        let mut out_result = ptr::null();
+        let mut out_result: *const T = ptr::null();
 
         let config = include_str!("default_predict_config.json");
         let config = std::ffi::CString::new(config).unwrap();
 
-        let opt_matrix = std::ptr::null_mut();
+        let opt_matrix: *mut T = std::ptr::null_mut();
 
         let mut out_dim: u64 = 0;
 

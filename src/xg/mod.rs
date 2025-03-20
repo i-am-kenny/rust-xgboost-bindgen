@@ -1,14 +1,14 @@
 pub use array_interface::*;
 pub use booster::*;
 pub use dmatrix::*;
-pub use proxy_dmatrix::*;
 pub use error::{XGBoostError, XGBoostResult};
+pub use proxy_dmatrix::*;
 
 mod array_interface;
 mod booster;
-mod proxy_dmatrix;
 mod dmatrix;
 mod error;
+mod proxy_dmatrix;
 mod utils;
 
 #[macro_export]
