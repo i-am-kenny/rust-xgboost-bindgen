@@ -142,7 +142,7 @@ impl Booster {
 
     pub fn inplace_predict<T: XGCompatible>(
         &self,
-        matrix: &ProxyDMatrix<'_, T>,
+        matrix: &T,
     ) -> XGBoostResult<(Vec<u64>, Vec<f32>)> {
         let shape: Rc<u64> = Rc::new(0u64);
         let shape = Rc::as_ptr(&shape);
@@ -157,7 +157,7 @@ impl Booster {
 
         let mut out_dim: u64 = 0;
 
-        match matrix.inner.hint() {
+        match matrix.hint() {
             super::XGMatrixType::Dense(interface) => {
                 let interface = match interface {
                     ArrayInterface::Strict(interface) => serde_json::to_string(&interface).unwrap(),
