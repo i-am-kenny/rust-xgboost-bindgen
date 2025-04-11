@@ -33,7 +33,7 @@ fn main() {
         {
             config.define("USE_CUDA", "ON");
 
-            config.define("GPU_COMPUTE_VER", "80");
+            config.define("CMAKE_CUDA_ARCHITECTURES", "80;86;87;89");
 
             // let mut architectures = vec![];
 
