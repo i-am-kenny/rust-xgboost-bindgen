@@ -33,20 +33,22 @@ fn main() {
         {
             config.define("USE_CUDA", "ON");
 
-            let mut architectures = vec![];
+            config.define("GPU_COMPUTE_VER", "80");
 
-            #[cfg(feature = "turing")]
-            architectures.push("75");
+            // let mut architectures = vec![];
 
-            #[cfg(feature = "ampere")]
-            architectures.push("80");
-
-            #[cfg(feature = "lovelace")]
-            architectures.push("89");
-
-            if !architectures.is_empty() {
-                config.define("CMAKE_CUDA_ARCHITECTURES", architectures.join(";"));
-            }
+            // #[cfg(feature = "turing")]
+            // architectures.push("75");
+            //
+            // #[cfg(feature = "ampere")]
+            // architectures.push("80");
+            //
+            // #[cfg(feature = "lovelace")]
+            // architectures.push("89");
+            //
+            // if !architectures.is_empty() {
+            //     config.define("CMAKE_CUDA_ARCHITECTURES", architectures.join(";"));
+            // }
         }
 
         config
