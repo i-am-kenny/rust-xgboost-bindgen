@@ -152,6 +152,7 @@ impl Booster {
         ))?;
 
         if out.is_null() {
+            tracing::warn!("failed to get attribute names");
             return Ok(Vec::new());
         }
 
@@ -182,6 +183,7 @@ impl Booster {
                 ))?;
 
                 if feature_names.is_null() || success == 0 {
+                    tracing::warn!("failed to get feature names");
                     Ok(Vec::new())
                 } else {
                     let names_str = unsafe {
@@ -195,7 +197,10 @@ impl Booster {
                         .collect::<Vec<String>>())
                 }
             })
-            .unwrap_or(Ok(Vec::new()))?;
+            .unwrap_or_else(|_| {
+                tracing::warn!("feature names not found");
+                Ok(Vec::new())
+            })?;
 
         Ok(feature_names)
     }
