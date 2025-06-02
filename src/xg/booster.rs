@@ -141,7 +141,7 @@ impl Booster {
     }
 
     pub fn get_feature_names(&self) -> XGBoostResult<Vec<String>> {
-        let mut out = ptr::null();
+        let mut out: *mut *mut i8 = ptr::null_mut();
         let mut out_len = 0;
 
         // First get all attribute names
@@ -159,11 +159,7 @@ impl Booster {
         let attr_names = unsafe {
             slice::from_raw_parts(out, out_len as usize)
                 .iter()
-                .map(|&ptr| {
-                    std::ffi::CStr::from_ptr(ptr)
-                        .to_string_lossy()
-                        .into_owned()
-                })
+                .map(|&ptr| std::ffi::CStr::from_ptr(ptr).to_string_lossy().into_owned())
                 .collect::<Vec<String>>()
         };
 
@@ -173,13 +169,19 @@ impl Booster {
             .find(|&name| name == "feature_names")
             .map(|_| {
                 let mut feature_names = ptr::null();
+                let mut success = 0;
+                let key = std::ffi::CString::new("feature_names").map_err(|e| XGBoostError {
+                    inner: e.to_string(),
+                })?;
+
                 crate::xgboost_call!(bindings::XGBoosterGetAttr(
                     self.handle,
-                    "feature_names",
-                    &mut feature_names
+                    key.as_ptr(),
+                    &mut feature_names,
+                    &mut success
                 ))?;
 
-                if feature_names.is_null() {
+                if feature_names.is_null() || success == 0 {
                     Ok(Vec::new())
                 } else {
                     let names_str = unsafe {
