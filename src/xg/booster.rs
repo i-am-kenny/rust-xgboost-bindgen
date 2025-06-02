@@ -141,7 +141,7 @@ impl Booster {
     }
 
     pub fn get_feature_names(&self) -> XGBoostResult<Vec<String>> {
-        let mut out: *mut *mut i8 = ptr::null_mut();
+        let mut out: *mut *const i8 = ptr::null_mut();
         let mut out_len = 0;
 
         // First get all attribute names
