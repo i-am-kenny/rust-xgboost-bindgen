@@ -1,6 +1,10 @@
 use std::{path::Path, ptr, rc::Rc, slice};
 
-use crate::{bindings, xg::XGBoostError, DMatrix};
+use crate::{
+    bindings,
+    xg::{utils::str_to_cstring, XGBoostError},
+    DMatrix,
+};
 
 use super::{utils, ArrayInterface, ProxyDMatrix, XGBoostResult, XGCompatible};
 
@@ -145,9 +149,7 @@ impl Booster {
         let mut out_len = 0;
 
         // Get feature names using XGBoosterGetStrFeatureInfo
-        let field = std::ffi::CString::new("feature_name").map_err(|e| XGBoostError {
-            inner: e.to_string(),
-        })?;
+        let field = str_to_cstring("feature_name")?;
 
         crate::xgboost_call!(bindings::XGBoosterGetStrFeatureInfo(
             self.handle,
