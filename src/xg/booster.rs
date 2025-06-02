@@ -144,65 +144,26 @@ impl Booster {
         let mut out: *mut *const i8 = ptr::null_mut();
         let mut out_len = 0;
 
-        // First get all attribute names
-        crate::xgboost_call!(bindings::XGBoosterGetAttrNames(
+        // Get feature names using XGBoosterGetStrFeatureInfo
+        crate::xgboost_call!(bindings::XGBoosterGetStrFeatureInfo(
             self.handle,
+            "feature_name",
             &mut out_len,
             &mut out
         ))?;
 
         if out.is_null() {
-            tracing::warn!("failed to get attribute names");
+            tracing::warn!("failed to get feature_name");
             return Ok(Vec::new());
         }
 
         // Convert the array of C strings to Vec<String>
-        let attr_names = unsafe {
+        let feature_names = unsafe {
             slice::from_raw_parts(out, out_len as usize)
                 .iter()
                 .map(|&ptr| std::ffi::CStr::from_ptr(ptr).to_string_lossy().into_owned())
                 .collect::<Vec<String>>()
         };
-
-        tracing::info!("attr_names: {:?}", attr_names);
-
-        // Look for feature_names attribute
-        let feature_names = attr_names
-            .iter()
-            .find(|&name| name == "feature_names")
-            .map(|_| {
-                let mut feature_names = ptr::null();
-                let mut success = 0;
-                let key = std::ffi::CString::new("feature_names").map_err(|e| XGBoostError {
-                    inner: e.to_string(),
-                })?;
-
-                crate::xgboost_call!(bindings::XGBoosterGetAttr(
-                    self.handle,
-                    key.as_ptr(),
-                    &mut feature_names,
-                    &mut success
-                ))?;
-
-                if feature_names.is_null() || success == 0 {
-                    tracing::warn!("failed to get feature names");
-                    Ok(Vec::new())
-                } else {
-                    let names_str = unsafe {
-                        std::ffi::CStr::from_ptr(feature_names)
-                            .to_string_lossy()
-                            .into_owned()
-                    };
-                    Ok(names_str
-                        .split(',')
-                        .map(|s| s.trim().to_string())
-                        .collect::<Vec<String>>())
-                }
-            })
-            .unwrap_or_else(|| {
-                tracing::warn!("feature names not found");
-                Ok(Vec::new())
-            })?;
 
         Ok(feature_names)
     }
