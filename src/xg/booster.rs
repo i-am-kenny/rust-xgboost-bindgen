@@ -164,6 +164,8 @@ impl Booster {
                 .collect::<Vec<String>>()
         };
 
+        tracing::info!("attr_names: {:?}", attr_names);
+
         // Look for feature_names attribute
         let feature_names = attr_names
             .iter()
@@ -197,7 +199,7 @@ impl Booster {
                         .collect::<Vec<String>>())
                 }
             })
-            .unwrap_or_else(|_| {
+            .unwrap_or_else(|| {
                 tracing::warn!("feature names not found");
                 Ok(Vec::new())
             })?;
