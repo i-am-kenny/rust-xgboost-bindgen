@@ -140,6 +140,64 @@ impl Booster {
         Ok(out)
     }
 
+    pub fn get_feature_names(&self) -> XGBoostResult<Vec<String>> {
+        let mut out = ptr::null();
+        let mut out_len = 0;
+
+        // First get all attribute names
+        crate::xgboost_call!(bindings::XGBoosterGetAttrNames(
+            self.handle,
+            &mut out_len,
+            &mut out
+        ))?;
+
+        if out.is_null() {
+            return Ok(Vec::new());
+        }
+
+        // Convert the array of C strings to Vec<String>
+        let attr_names = unsafe {
+            slice::from_raw_parts(out, out_len as usize)
+                .iter()
+                .map(|&ptr| {
+                    std::ffi::CStr::from_ptr(ptr)
+                        .to_string_lossy()
+                        .into_owned()
+                })
+                .collect::<Vec<String>>()
+        };
+
+        // Look for feature_names attribute
+        let feature_names = attr_names
+            .iter()
+            .find(|&name| name == "feature_names")
+            .map(|_| {
+                let mut feature_names = ptr::null();
+                crate::xgboost_call!(bindings::XGBoosterGetAttr(
+                    self.handle,
+                    "feature_names",
+                    &mut feature_names
+                ))?;
+
+                if feature_names.is_null() {
+                    Ok(Vec::new())
+                } else {
+                    let names_str = unsafe {
+                        std::ffi::CStr::from_ptr(feature_names)
+                            .to_string_lossy()
+                            .into_owned()
+                    };
+                    Ok(names_str
+                        .split(',')
+                        .map(|s| s.trim().to_string())
+                        .collect::<Vec<String>>())
+                }
+            })
+            .unwrap_or(Ok(Vec::new()))?;
+
+        Ok(feature_names)
+    }
+
     pub fn inplace_predict<T: XGCompatible>(
         &self,
         matrix: &T,
