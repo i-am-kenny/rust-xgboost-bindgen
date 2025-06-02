@@ -145,9 +145,13 @@ impl Booster {
         let mut out_len = 0;
 
         // Get feature names using XGBoosterGetStrFeatureInfo
+        let field = std::ffi::CString::new("feature_name").map_err(|e| XGBoostError {
+            inner: e.to_string(),
+        })?;
+
         crate::xgboost_call!(bindings::XGBoosterGetStrFeatureInfo(
             self.handle,
-            "feature_name",
+            field.as_ptr(),
             &mut out_len,
             &mut out
         ))?;
