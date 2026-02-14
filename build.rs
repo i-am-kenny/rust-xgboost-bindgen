@@ -24,9 +24,6 @@ fn main() {
         // .define("CXX", "g++-11")
         .build();
 
-    let cuda_target_include = "/usr/local/cuda-12.4/targets/x86_64-linux/include";
-    let deep_variant_path = format!("{}/cuda/std/detail/libcxx/include", cuda_target_include);
-
     #[cfg(not(target_os = "macos"))]
     let dst = {
         let mut config = cmake::Config::new(xgb_root.as_path());
@@ -37,8 +34,6 @@ fn main() {
             config.define("USE_CUDA", "ON");
 
             config.define("CMAKE_CUDA_ARCHITECTURES", "80;86;87;89");
-
-            config.cxxflag(format!("-I{}", deep_variant_path));
 
             // let mut architectures = vec![];
 
@@ -67,8 +62,6 @@ fn main() {
         .blocklist_item("std::__1.*")
         .clang_args(&["-x", "c++", "-std=c++17"])
         .clang_arg(format!("-I{}", xgb_root.join("include").display()))
-        .clang_arg(format!("-I{}", cuda_target_include))
-        .clang_arg(format!("-I{}", deep_variant_path))
         .clang_arg(format!(
             "-I{}",
             xgb_root.join("dmlc-core/include").display()
